@@ -1,0 +1,5 @@
+
+## -- BLOCK:go --
+build/*
+releases/*
+## -- BLOCK:go --
