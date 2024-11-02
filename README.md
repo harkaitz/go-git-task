@@ -20,7 +20,7 @@ the following format:
     
     This is the description
 
-## Go programs
+## Programs
 
     Usage: git-task SUBCOMMAND [ARGS...]
     
@@ -36,8 +36,8 @@ the following format:
       view [ID]           View task (by default ongoing).
       changelog VER LINE  Print changelog section for version.
     
-    Statuses: %v
-    Fields: %v
+    Statuses: @new,@todo,@done,@closed,@invalid,@ongoing,@back
+    Fields: ID,Prio,Status,Project,Reporter,Assignee,SubjectSlug
 
 ## Go documentation
 

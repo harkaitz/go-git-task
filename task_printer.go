@@ -5,11 +5,9 @@ import (
 	"strings"
 )
 
-// -------------------------------------------------------------------
-
 func (t Task) PrintRow(s Settings) {
-	var field	string
-	var format	string
+	var field         string
+	var format        string
 	for _, field = range strings.Split(s.LsFields, ",") {
 		format = fieldFormat(field)
 		switch field {
@@ -35,6 +33,12 @@ func (t Task) PrintRow(s Settings) {
 	fmt.Println()
 }
 
+func (t Task) PrintTable() {
+	fmt.Println(t.String())
+}
+
+// -------------------------------------------------------------------
+// ---- Private functions --------------------------------------------
 // -------------------------------------------------------------------
 
 func fieldFormat(field string) string {

@@ -9,7 +9,7 @@ import (
 )
 
 const help string =
-`Usage: git-task SUBCOMMAND [ARGS...]
+`Usage: git task SUBCOMMAND [ARGS...]
 
 This program is a task manager for git. It uses a directory ".task" to
 store the tasks as ".task/@STATUS/@ID_SLUG.task":
@@ -23,13 +23,13 @@ store the tasks as ".task/@STATUS/@ID_SLUG.task":
   view [ID]           View task (by default ongoing).
   changelog VER LINE  Print changelog section for version.
 
-Statuses: %v
-Fields: %v
+Statuses: @new,@todo,@done,@closed,@invalid,@ongoing,@back
+Fields: ID,Prio,Status,Project,Reporter,Assignee,SubjectSlug
 
 Copyright (c) 2024 - Harkaitz Agirre - All rights reserved.`
 
 const lsHelp string =
-`git-task ls [OPTIONS...]
+`git task ls [OPTIONS...]
 
 List tasks.
 
@@ -44,9 +44,9 @@ Fields: %v
 var S gtask.Settings
 
 func main() {
-	var err		error
-	var cmd		string
-	var args	[]string
+	var err           error
+	var cmd           string
+	var args        []string
 
 	// Error manager.
 	defer func() {
@@ -62,7 +62,7 @@ func main() {
 
 	// Parse the command line.
 	if len(os.Args) <= 1 || os.Args[1] == "--help" || os.Args[1] == "-h" {
-		fmt.Printf(help + "\n", S.LsStates, S.LsFields)
+		fmt.Println(help)
 		return
 	}
 	cmd = os.Args[1]
@@ -90,8 +90,8 @@ func Show() (err error) {
 }
 
 func New() (err error) {
-	var task	gtask.Task
-	var filename	string
+	var task          gtask.Task
+	var filename      string
 
 	task.Init(S)
 	filename, err = task.Save(S)
@@ -102,8 +102,8 @@ func New() (err error) {
 }
 
 func Edit(args []string) (err error) {
-	var tasks	gtask.Tasks
-	var task	*gtask.Task
+	var tasks         gtask.Tasks
+	var task         *gtask.Task
 
 	tasks, err = S.ListTasks()
 	if err != nil { return }
@@ -117,14 +117,14 @@ func Edit(args []string) (err error) {
 
 	err = task.Edit(S)
 	if err != nil { return }
-	
+
 	return
 }
 
 func Ls(args []string) (err error) {
-	var tasks	gtask.Tasks
-	var arg		string
-	var parts	[]string
+	var tasks         gtask.Tasks
+	var arg           string
+	var parts       []string
 
 	for _, arg = range args {
 		parts = strings.SplitN(arg, "=", 2)
@@ -152,9 +152,9 @@ func Ls(args []string) (err error) {
 }
 
 func Status(status string, args []string) (err error) {
-	var tasks	gtask.Tasks
-	var task	*gtask.Task
-	var arg		string
+	var tasks         gtask.Tasks
+	var task         *gtask.Task
+	var arg           string
 
 	tasks, err = S.ListTasks()
 	if err != nil { return }
@@ -173,8 +173,8 @@ func Status(status string, args []string) (err error) {
 }
 
 func Rename(args []string) (err error) {
-	var tasks	gtask.Tasks
-	var task	*gtask.Task
+	var tasks         gtask.Tasks
+	var task         *gtask.Task
 
 	if len(args) < 2 {
 		err = fmt.Errorf("Not enough arguments")
@@ -194,8 +194,8 @@ func Rename(args []string) (err error) {
 }
 
 func View(args []string) (err error) {
-	var tasks	gtask.Tasks
-	var task	*gtask.Task
+	var tasks         gtask.Tasks
+	var task         *gtask.Task
 
 	tasks, err = S.ListTasks()
 	if err != nil { return }
@@ -212,10 +212,10 @@ func View(args []string) (err error) {
 }
 
 func Changelog(args []string) (err error) {
-	var tasks	gtask.Tasks
-	var version	string
-	var line	string
-	var errl	[]error
+	var tasks         gtask.Tasks
+	var version       string
+	var line          string
+	var errl        []error
 
 	switch len(args) {
 	case 0:  err = fmt.Errorf("Not enough arguments")

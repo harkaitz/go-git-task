@@ -13,11 +13,11 @@ type Tasks struct {
 
 
 func (s Settings) ListTasks() (t Tasks, err error) {
-	var cmd		*exec.Cmd
-	var out		[]byte
-	var task	Task
-	var filename	string
-	var errl	[]error
+	var cmd          *exec.Cmd
+	var out         []byte
+	var task          Task
+	var filename      string
+	var errl        []error
 
 	cmd = exec.Command("find", s.Directory, "-type", "f", "-name", "*.task")
 	out, err = cmd.Output()
@@ -38,13 +38,13 @@ func (s Settings) ListTasks() (t Tasks, err error) {
 }
 
 func (i Tasks) FilterByStatus(status string) (o Tasks) {
-	var t		Task
+	var task          Task
 
 	o.Tasks = []Task{}
 
-	for _, t = range i.Tasks {
-		if t.Status == status {
-			o.Tasks = append(o.Tasks, t)
+	for _, task = range i.Tasks {
+		if task.Status == status {
+			o.Tasks = append(o.Tasks, task)
 		}
 	}
 
@@ -52,13 +52,13 @@ func (i Tasks) FilterByStatus(status string) (o Tasks) {
 }
 
 func (i Tasks) FilterByVersionPublic(version string) (o Tasks) {
-	var t		Task
+	var task          Task
 
 	o.Tasks = []Task{}
 
-	for _, t = range i.Tasks {
-		if t.Version == version {
-			o.Tasks = append(o.Tasks, t)
+	for _, task = range i.Tasks {
+		if task.Version == version {
+			o.Tasks = append(o.Tasks, task)
 		}
 	}
 
@@ -66,8 +66,8 @@ func (i Tasks) FilterByVersionPublic(version string) (o Tasks) {
 }
 
 func (i Tasks) FilterBySettings(s Settings) (o Tasks) {
-	var status		string
-	var task		Task
+	var status        string
+	var task          Task
 
 	o.Tasks = []Task{}
 
@@ -91,7 +91,6 @@ func (i Tasks) FilterBySettings(s Settings) (o Tasks) {
 	return
 }
 
-
 func (i Tasks) First(errm string, a ...any) (task *Task, found bool, err error) {
 	if len(i.Tasks) >= 1 {
 		task = &i.Tasks[0]
@@ -104,7 +103,7 @@ func (i Tasks) First(errm string, a ...any) (task *Task, found bool, err error) 
 }
 
 func (i Tasks) SearchByID(id string) (t *Task, found bool, err error) {
-	var n	int
+	var n             int
 
 	for n = range i.Tasks {
 		if i.Tasks[n].ID == id {

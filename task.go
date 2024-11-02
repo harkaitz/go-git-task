@@ -4,7 +4,6 @@ import (
 	"math/rand"
 	"strings"
 	"strconv"
-	"encoding/json"
 	"os"
 	"fmt"
 )
@@ -26,12 +25,9 @@ type Task struct {
 	Description string
 }
 
-// -------------------------------------------------------------------
-
-const letterBytes = "0123456789"
 
 func (t *Task) Init(s Settings) {
-	t.ID = getNewID(6)
+	t.ID = getNewID(s, 6)
 	t.Slug = "no_name"
 	t.Status = "@new"
 	//
@@ -47,16 +43,16 @@ func (t *Task) Init(s Settings) {
 	t.Description = ""
 }
 
-func (t *Task) ParseString(s string) (err error) {
-	var lines	[]string
-	var line	string
-	var field	string
-	var value	string
-	var lineNo	int
-	var found	bool
+func (t *Task) ParseString(data string) (err error) {
+	var lines       []string
+	var line          string
+	var field         string
+	var value         string
+	var lineNo        int
+	var found         bool
 
 	// Split the string into lines
-	lines = strings.Split(s, "\n")
+	lines = strings.Split(data, "\n")
 
 	// Parse the lines
 	for lineNo, line = range lines {
@@ -87,9 +83,9 @@ func (t *Task) ParseString(s string) (err error) {
 }
 
 func (t *Task) ParseFile(filename string) (err error) {
-	var data	[]byte
-	var parts1	[]string
-	var parts2	[]string
+	var data        []byte
+	var parts1      []string
+	var parts2      []string
 
 	parts1 = strings.Split(filename, "/")
 	if len(parts1) < 2 {
@@ -116,38 +112,24 @@ func (t *Task) ParseFile(filename string) (err error) {
 	return t.ParseString(string(data))
 }
 
-func (t *Task) String() (r string) {
-	r  = "Project: " + t.Project + "\n"
-	r += "Type: " + t.Type + "\n"
-	r += "Subject: " + t.Subject + "\n"
-	r += "Public: " + strconv.FormatBool(t.Public) + "\n"
-	r += "Priority: " + strconv.Itoa(t.Priority) + "\n"
-	r += "Assignee: " + t.Assignee + "\n"
-	r += "Reporter: " + t.Reporter + "\n"
-	r += "Changelog: " + t.Changelog + "\n"
-	r += "Version: " + t.Version + "\n"
-	r += "\n"
-	r += t.Description
+func (t *Task) String() (data string) {
+	data  = "Project: " + t.Project + "\n"
+	data += "Type: " + t.Type + "\n"
+	data += "Subject: " + t.Subject + "\n"
+	data += "Public: " + strconv.FormatBool(t.Public) + "\n"
+	data += "Priority: " + strconv.Itoa(t.Priority) + "\n"
+	data += "Assignee: " + t.Assignee + "\n"
+	data += "Reporter: " + t.Reporter + "\n"
+	data += "Changelog: " + t.Changelog + "\n"
+	data += "Version: " + t.Version + "\n"
+	data += "\n"
+	data += t.Description
 	return
 }
-
-// -------------------------------------------------------------------
-
-func (t *Task) Directory(s Settings) (directory string) {
-	directory = s.Directory + "/" + t.Status
-	return
-}
-
-func (t *Task) Filename(s Settings) (filename string) {
-	filename = t.Directory(s) + "/" + t.ID + "_" + t.Slug + ".task"
-	return
-}
-
-// -------------------------------------------------------------------
 
 func (t *Task) Save(s Settings) (filename string, err error) {
-	var data	string
-	var fp		*os.File
+	var data          string
+	var fp           *os.File
 
 	filename = t.Filename(s)
 	data = t.String()
@@ -164,9 +146,21 @@ func (t *Task) Save(s Settings) (filename string, err error) {
 }
 
 // -------------------------------------------------------------------
+// ---- File renaming operations -------------------------------------
+// -------------------------------------------------------------------
+
+func (t *Task) Directory(s Settings) (directory string) {
+	directory = s.Directory + "/" + t.Status
+	return
+}
+
+func (t *Task) Filename(s Settings) (filename string) {
+	filename = t.Directory(s) + "/" + t.ID + "_" + t.Slug + ".task"
+	return
+}
 
 func (t *Task) MoveStatus(s Settings, status string) (err error) {
-	var fr, to, dir		string
+	var fr, to, dir   string
 
 	err = t.CheckNewStatus(s, status)
 	if err != nil { return }
@@ -186,7 +180,7 @@ func (t *Task) MoveStatus(s Settings, status string) (err error) {
 }
 
 func (t *Task) MoveRename(s Settings, slug string) (err error) {
-	var fr, to, dir		string
+	var fr, to, dir   string
 
 	fr = t.Filename(s)
 	t.Slug = slug
@@ -203,7 +197,7 @@ func (t *Task) MoveRename(s Settings, slug string) (err error) {
 }
 
 func (t *Task) CheckNewStatus(s Settings, status string) (err error) {
-	var state	string
+	var state         string
 
 	for _, state = range strings.Split(s.States, ",") {
 		if state == status { return }
@@ -213,10 +207,13 @@ func (t *Task) CheckNewStatus(s Settings, status string) (err error) {
 	return
 }
 
+
+// -------------------------------------------------------------------
+// ---- Private functions --------------------------------------------
 // -------------------------------------------------------------------
 
 func getField(line string) (field, value string, found bool) {
-	var parts	[]string
+	var parts       []string
 
 	// Split by the first ":"
 	parts = strings.SplitN(line, ":", 2)
@@ -234,21 +231,10 @@ func getField(line string) (field, value string, found bool) {
 	return
 }
 
-func getNewID(n int) string {
+func getNewID(s Settings, n int) string {
     b := make([]byte, n)
     for i := range b {
-        b[i] = letterBytes[rand.Intn(len(letterBytes))]
+        b[i] = s.IDCharacters[rand.Intn(len(s.IDCharacters))]
     }
     return "@" + string(b)
-}
-
-// -------------------------------------------------------------------
-
-func (t Task) PrintTable() {
-	// TODO
-	var b	[]byte
-	var err	error
-	b, err = json.Marshal(t)
-	if err != nil { return }
-	fmt.Println(string(b))
 }

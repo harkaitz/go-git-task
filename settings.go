@@ -2,23 +2,23 @@ package gtask
 
 import (
 	"github.com/tcnksm/go-gitconfig"
-	"encoding/json"
 	"os"
 	"fmt"
 	"strings"
 )
 
 type Settings struct {
-	Directory	string
-	Project		string
-	Editor		string
-	States		string
-	Reporter	string
-	LsFields	string
-	LsStates	string
-	LsProject	string
-	LsReporter	string
-	LsAssignee	string
+	Directory         string
+	Project           string
+	Editor            string
+	States            string
+	Reporter          string
+	LsFields          string
+	LsStates          string
+	LsProject         string
+	LsReporter        string
+	LsAssignee        string
+	IDCharacters      string
 }
 
 func (s *Settings) Init() (err error) {
@@ -32,16 +32,8 @@ func (s *Settings) Init() (err error) {
 	s.LsProject  = getSetting("task.ls.project",  "", "")
 	s.LsReporter = ""
 	s.LsAssignee = ""
+	s.IDCharacters = "0123456789"
 	return
-}
-
-func (s Settings) String() string {
-	var b	[]byte
-	var err	error
-	b, err = json.Marshal(s)
-	if err != nil { return "" }
-	json.MarshalIndent(b, "", "    ")
-	return string(b)
 }
 
 func (s Settings) Println() {
@@ -72,16 +64,14 @@ func (s Settings) Println() {
 // -------------------------------------------------------------------
 
 func getSetting(gitConfig, envConfig, defValue string) (value string) {
-	var err error
-	var env string
+	var err           error
+	var env           string
 
 	if gitConfig != "" {
 		value, err = gitconfig.Entire(gitConfig)
 		if err == nil { return }
 	}
 
-	
-	
 	if envConfig != "" {
 		for _, env = range strings.Split(envConfig, ",") {
 			value = os.Getenv(env)

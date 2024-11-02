@@ -7,7 +7,7 @@ import (
 )
 
 func (s Settings) PrintTasksTableHeader() {
-	var field	string
+	var field         string
 
 	for _, field = range strings.Split(s.LsFields, ",") {
 		fmt.Printf(fieldFormat(field), field)
@@ -17,7 +17,7 @@ func (s Settings) PrintTasksTableHeader() {
 
 
 func (i Tasks) PrintTable(s Settings) {
-	var task	Task
+	var task          Task
 
 	for _, task = range i.Tasks {
 		task.PrintRow(s)
@@ -25,7 +25,7 @@ func (i Tasks) PrintTable(s Settings) {
 }
 
 func (i Tasks) PrintChangelog(version, line string) (errl []error) {
-	var task	Task
+	var task          Task
 
 	fmt.Printf("%v  %v  %v\n\n", time.Now().Format("2006-01-02"), version, line)
 	for _, task = range i.Tasks {
