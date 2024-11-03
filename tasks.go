@@ -2,6 +2,7 @@ package gtask
 
 import (
 	"os"
+	"io/fs"
 	"strings"
 	"errors"
 	"fmt"
@@ -14,21 +15,19 @@ type Tasks struct {
 
 func (s *Settings) ListTasks() (t Tasks, err error) {
 	var task          Task
+	var filesChan     chan string
 	var filename      string
-	var filenames   []string
 	var errl        []error
 
-	filenames, err = s.TaskFiles()
-	if err != nil { return }
+	filesChan = s.TaskFiles()
 
 	t.Tasks = []Task{}
-	for _, filename = range filenames {
+	for filename = range filesChan {
 		task = Task{}
 		err = task.ParseFile(filename)
-		if err != nil { errl = append(errl, err) }
+		if err != nil { errl = append(errl, err); continue }
 		t.Tasks = append(t.Tasks, task)
 	}
-
 	if errl != nil { err = errors.Join(errl...) }
 
 	return
@@ -114,13 +113,33 @@ func (i Tasks) SearchByID(id string) (t *Task, found bool, err error) {
 	return
 }
 
-func (s *Settings) TaskFiles() (files []string, err error) {
-	err = filepath.Walk(s.GetDirectory(), func(path string, info os.FileInfo, err error) error {
-		if err != nil { return err }
-		if !info.IsDir() && filepath.Ext(path) == ".task" {
-			files = append(files, path)
+func (s *Settings) TaskFiles() (files chan string) {
+	files = make(chan string, 20)
+
+	go func(dd string) {
+		var e1l, e2l     []fs.DirEntry
+		var e1, e2        fs.DirEntry
+		var err           error
+		var p1            string
+
+		e1l, err = os.ReadDir(s.GetDirectory())
+		if err != nil { return }
+
+		for _, e1 = range e1l {
+			if e1.IsDir() && e1.Name()[0] == '@' {
+				p1 = dd + "/" + e1.Name()
+				e2l, err = os.ReadDir(p1)
+				if err != nil { continue }
+				for _, e2 = range e2l {
+					if !e2.IsDir() && filepath.Ext(e2.Name()) == ".task" {
+						files <- p1 + "/" + e2.Name()
+					}
+				}
+			}
 		}
-		return nil
-	})
+
+		close(files)
+	}(s.GetDirectory())
+
 	return
 }
