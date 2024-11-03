@@ -94,7 +94,7 @@ func New() (err error) {
 	var filename      string
 
 	task.Init(S)
-	filename, err = task.Save(S)
+	filename, err = task.Save(&S)
 	if err != nil { return }
 	fmt.Println("Task created:", filename)
 
@@ -115,7 +115,7 @@ func Edit(args []string) (err error) {
 	}
 	if err != nil { return }
 
-	err = task.Edit(S)
+	err = task.Edit(&S)
 	if err != nil { return }
 
 	return
@@ -129,7 +129,7 @@ func Ls(args []string) (err error) {
 	for _, arg = range args {
 		parts = strings.SplitN(arg, "=", 2)
 		if len(parts) != 2 || parts[0] == "help" || parts[0] == "-h" {
-			fmt.Printf(lsHelp, S.LsStates, S.LsFields)
+			fmt.Printf(lsHelp, S.GetLsStates(), S.GetLsFields())
 			return
 		}
 		switch parts[0] {
@@ -146,7 +146,7 @@ func Ls(args []string) (err error) {
 	if err != nil { return }
 
 	S.PrintTasksTableHeader()
-	tasks.FilterBySettings(S).PrintTable(S)
+	tasks.FilterBySettings(&S).PrintTable(&S)
 
 	return
 }
@@ -164,7 +164,7 @@ func Status(status string, args []string) (err error) {
 		task, _, err = tasks.SearchByID(arg)
 		if err != nil { return }
 
-		err = task.MoveStatus(S, status)
+		err = task.MoveStatus(&S, status)
 		if err != nil { return }
 
 	}
@@ -187,7 +187,7 @@ func Rename(args []string) (err error) {
 	task, _, err = tasks.SearchByID(args[0])
 	if err != nil { return }
 
-	err = task.MoveRename(S, strings.Join(args[1:], "_"))
+	err = task.MoveRename(&S, strings.Join(args[1:], "_"))
 	if err != nil { return }
 
 	return

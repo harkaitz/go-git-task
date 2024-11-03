@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-func (t Task) PrintRow(s Settings) {
+func (t Task) PrintRow(s *Settings) {
 	var field         string
 	var format        string
-	for _, field = range strings.Split(s.LsFields, ",") {
+	for _, field = range strings.Split(s.GetLsFields(), ",") {
 		format = fieldFormat(field)
 		switch field {
 		case "SubjectSlug": fmt.Printf("%s (%s)", t.Subject, t.Slug)

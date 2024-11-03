@@ -1,31 +1,28 @@
 package gtask
 
 import (
-	"os/exec"
+	"os"
 	"strings"
 	"errors"
 	"fmt"
+	"path/filepath"
 )
 
 type Tasks struct {
 	Tasks	[]Task
 }
 
-
-func (s Settings) ListTasks() (t Tasks, err error) {
-	var cmd          *exec.Cmd
-	var out         []byte
+func (s *Settings) ListTasks() (t Tasks, err error) {
 	var task          Task
 	var filename      string
+	var filenames   []string
 	var errl        []error
 
-	cmd = exec.Command("find", s.Directory, "-type", "f", "-name", "*.task")
-	out, err = cmd.Output()
+	filenames, err = s.TaskFiles()
 	if err != nil { return }
 
 	t.Tasks = []Task{}
-	for _, filename = range strings.Split(string(out), "\n") {
-		if filename == "" { continue }
+	for _, filename = range filenames {
 		task = Task{}
 		err = task.ParseFile(filename)
 		if err != nil { errl = append(errl, err) }
@@ -65,13 +62,15 @@ func (i Tasks) FilterByVersionPublic(version string) (o Tasks) {
 	return
 }
 
-func (i Tasks) FilterBySettings(s Settings) (o Tasks) {
+func (i Tasks) FilterBySettings(s *Settings) (o Tasks) {
 	var status        string
 	var task          Task
 
 	o.Tasks = []Task{}
 
-	for _, status = range strings.Split(s.LsStates, ",") {
+	s.GetLsProject()
+
+	for _, status = range strings.Split(s.GetLsStates(), ",") {
 		for _, task = range i.Tasks {
 			if s.LsProject != "" && task.Project != s.LsProject {
 				continue
@@ -112,5 +111,16 @@ func (i Tasks) SearchByID(id string) (t *Task, found bool, err error) {
 	}
 
 	err = fmt.Errorf("Task not found: %s", id)
+	return
+}
+
+func (s *Settings) TaskFiles() (files []string, err error) {
+	err = filepath.Walk(s.GetDirectory(), func(path string, info os.FileInfo, err error) error {
+		if err != nil { return err }
+		if !info.IsDir() && filepath.Ext(path) == ".task" {
+			files = append(files, path)
+		}
+		return nil
+	})
 	return
 }

@@ -9,14 +9,14 @@ import (
 func (s Settings) PrintTasksTableHeader() {
 	var field         string
 
-	for _, field = range strings.Split(s.LsFields, ",") {
+	for _, field = range strings.Split(s.GetLsFields(), ",") {
 		fmt.Printf(fieldFormat(field), field)
 	}
 	fmt.Printf("\n\n")
 }
 
 
-func (i Tasks) PrintTable(s Settings) {
+func (i Tasks) PrintTable(s *Settings) {
 	var task          Task
 
 	for _, task = range i.Tasks {

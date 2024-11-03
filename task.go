@@ -31,13 +31,13 @@ func (t *Task) Init(s Settings) {
 	t.Slug = "no_name"
 	t.Status = "@new"
 	//
-	t.Project = s.Project
+	t.Project = s.GetProject()
 	t.Type = "task"
 	t.Subject = "No subject"
 	t.Public = false
 	t.Priority = 0
 	t.Assignee = "nobody"
-	t.Reporter = s.Reporter
+	t.Reporter = s.GetReporter()
 	t.Changelog = ""
 	t.Version = ""
 	t.Description = ""
@@ -127,14 +127,14 @@ func (t *Task) String() (data string) {
 	return
 }
 
-func (t *Task) Save(s Settings) (filename string, err error) {
+func (t *Task) Save(s *Settings) (filename string, err error) {
 	var data          string
 	var fp           *os.File
 
 	filename = t.Filename(s)
 	data = t.String()
 
-	err = os.MkdirAll(s.Directory + "/" + t.Status, 0755)
+	err = os.MkdirAll(s.GetDirectory() + "/" + t.Status, 0755)
 	if err != nil { return }
 
 	fp, err = os.Create(filename)
@@ -149,17 +149,17 @@ func (t *Task) Save(s Settings) (filename string, err error) {
 // ---- File renaming operations -------------------------------------
 // -------------------------------------------------------------------
 
-func (t *Task) Directory(s Settings) (directory string) {
-	directory = s.Directory + "/" + t.Status
+func (t *Task) Directory(s *Settings) (directory string) {
+	directory = s.GetDirectory() + "/" + t.Status
 	return
 }
 
-func (t *Task) Filename(s Settings) (filename string) {
+func (t *Task) Filename(s *Settings) (filename string) {
 	filename = t.Directory(s) + "/" + t.ID + "_" + t.Slug + ".task"
 	return
 }
 
-func (t *Task) MoveStatus(s Settings, status string) (err error) {
+func (t *Task) MoveStatus(s *Settings, status string) (err error) {
 	var fr, to, dir   string
 
 	err = t.CheckNewStatus(s, status)
@@ -179,7 +179,7 @@ func (t *Task) MoveStatus(s Settings, status string) (err error) {
 	return
 }
 
-func (t *Task) MoveRename(s Settings, slug string) (err error) {
+func (t *Task) MoveRename(s *Settings, slug string) (err error) {
 	var fr, to, dir   string
 
 	fr = t.Filename(s)
@@ -196,10 +196,10 @@ func (t *Task) MoveRename(s Settings, slug string) (err error) {
 	return
 }
 
-func (t *Task) CheckNewStatus(s Settings, status string) (err error) {
+func (t *Task) CheckNewStatus(s *Settings, status string) (err error) {
 	var state         string
 
-	for _, state = range strings.Split(s.States, ",") {
+	for _, state = range strings.Split(s.GetStates(), ",") {
 		if state == status { return }
 	}
 

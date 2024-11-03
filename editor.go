@@ -8,7 +8,7 @@ import (
 func (s Settings) OpenEditor(filename string) (err error) {
 	var cmd		*exec.Cmd
 
-	cmd = exec.Command("sh", "-ec", s.Editor + " \"$1\"", "--", filename)
+	cmd = exec.Command("sh", "-ec", s.GetEditor() + " \"$1\"", "--", filename)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -20,7 +20,7 @@ func (s Settings) OpenEditor(filename string) (err error) {
 	return
 }
 
-func (t *Task) Edit(s Settings) (err error) {
+func (t *Task) Edit(s *Settings) (err error) {
 	var filename string
 
 	filename = t.Filename(s)
