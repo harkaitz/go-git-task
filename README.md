@@ -22,7 +22,7 @@ the following format:
 
 ## Programs
 
-    Usage: git-task SUBCOMMAND [ARGS...]
+    Usage: git task SUBCOMMAND [ARGS...]
     
     This program is a task manager for git. It uses a directory ".task" to
     store the tasks as ".task/@STATUS/@ID_SLUG.task":
@@ -38,6 +38,31 @@ the following format:
     
     Statuses: @new,@todo,@done,@closed,@invalid,@ongoing,@back
     Fields: ID,Prio,Status,Project,Reporter,Assignee,SubjectSlug
+
+## Installation on MS Windows machines (v10 and above)
+
+Download and extract the following zip and place the "bin" directory
+into your path.
+
+- https://github.com/harkaitz/go-git-task/releases/download/v1.0.5/git-task-1.0.5_Windows_NT_x86_64.zip
+- [How to add a directory to your Path](https://learn.microsoft.com/en-us/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14))
+
+We provide a simple ".bat" file that downloads and installs the program
+in your local user directory (%LOCALAPPDATA%).
+
+- https://github.com/harkaitz/go-git-task/releases/download/v1.0.5/git-task-1.0.5_Windows_NT_x86_64.bat
+
+Simply execute and type enter when asked.
+
+## Installation on POSIX machines
+
+Execute the following commands (or equivalent) to install the program
+in "/usr/local":
+
+    $ v="1.0.5"
+    $ u="https://github.com/harkaitz/go-git-task/releases/download/v${v}/git-task-${v}_$(uname -s)_$(uname -m).tar.gz"
+    $ curl -L -o /tmp/git-task.tar.gz "${u}"
+    $ sudo tar xf /tmp/git-task.tar.gz -C /
 
 ## Go documentation
 

@@ -3,3 +3,5 @@
 build/*
 releases/*
 ## -- BLOCK:go --
+## -- BLOCK:release --
+## -- BLOCK:release --
