@@ -80,6 +80,9 @@ func (i Tasks) FilterBySettings(s *Settings) (o Tasks) {
 			if s.LsAssignee != "" && task.Assignee != s.LsAssignee {
 				continue
 			}
+			if s.LsChangelog != "" && task.Changelog != s.LsChangelog {
+				continue
+			}
 			if task.Status == status {
 				o.Tasks = append(o.Tasks, task)
 			}
@@ -93,6 +96,7 @@ func (i Tasks) First(errm string, a ...any) (task *Task, found bool, err error) 
 	if len(i.Tasks) >= 1 {
 		task = &i.Tasks[0]
 		found = true
+		return
 	}
 	if errm != "" {
 		err = fmt.Errorf(errm, a...)
@@ -143,3 +147,22 @@ func (s *Settings) TaskFiles() (files chan string) {
 
 	return
 }
+
+func (s Settings) PrintTasksTableHeader() {
+	var field         string
+
+	for _, field = range strings.Split(s.GetLsFields(), ",") {
+		fmt.Printf(fieldFormat(field), field)
+	}
+	fmt.Printf("\n\n")
+}
+
+
+func (i Tasks) PrintTable(s *Settings) {
+	var task          Task
+
+	for _, task = range i.Tasks {
+		task.PrintRow(s)
+	}
+}
+

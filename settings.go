@@ -18,6 +18,7 @@ type Settings struct {
 	LsProject         string
 	LsReporter        string
 	LsAssignee        string
+	LsChangelog       string
 	IDCharacters      string
 }
 
@@ -72,7 +73,7 @@ func (s *Settings) GetReporter() string {
 }
 
 func (s *Settings) GetLsFields() string {
-	return getSetting(&s.LsFields, "task.ls.fields",   "", "ID,Prio,Status,Project,Reporter,Assignee,SubjectSlug")
+	return getSetting(&s.LsFields, "task.ls.fields",   "", "ID,Prio,Status,Project,Changelog,Assignee,SubjectSlug")
 }
 
 func (s *Settings) GetLsStates() string {

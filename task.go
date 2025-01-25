@@ -25,7 +25,6 @@ type Task struct {
 	Description string
 }
 
-
 func (t *Task) Init(s Settings) {
 	t.ID = getNewID(s, 6)
 	t.Slug = "no_name"
@@ -207,6 +206,56 @@ func (t *Task) CheckNewStatus(s *Settings, status string) (err error) {
 	return
 }
 
+func (t *Task) Remove(s *Settings) (err error) {
+	var filename      string
+
+	filename = t.Filename(s)
+	err = os.Remove(filename)
+	if err != nil { return }
+
+	return
+}
+
+// -------------------------------------------------------------------
+// ---- Printers -----------------------------------------------------
+// -------------------------------------------------------------------
+
+func (t Task) PrintRow(s *Settings) {
+	var field         string
+	var format        string
+	for _, field = range strings.Split(s.GetLsFields(), ",") {
+		format = fieldFormat(field)
+		switch field {
+		case "SubjectSlug":
+			if t.Slug == "no_name" {
+				fmt.Printf("%s", t.Subject)
+			} else {
+				fmt.Printf("%s (%s)", t.Subject, t.Slug)
+			}
+		//
+		case "ID":          fmt.Printf(format, str2(t.ID))
+		case "Slug":        fmt.Printf(format, str2(t.Slug))
+		case "Status":      fmt.Printf(format, str2(t.Status))
+		//
+		case "Project":     fmt.Printf(format, str2(t.Project))
+		case "Type":        fmt.Printf(format, str2(t.Type))
+		case "Subject":     fmt.Printf(format, str2(t.Subject))
+		case "Public":      fmt.Printf(format, bool2(t.Public))
+		case "Prio", "Priority": fmt.Printf(format, t.Priority)
+		case "Assignee":    fmt.Printf(format, str2(t.Assignee))
+		case "Reporter":    fmt.Printf(format, str2(t.Reporter))
+		case "Changelog":   fmt.Printf(format, str2(t.Changelog))
+		case "Version":     fmt.Printf(format, str2(t.Version))
+		//
+		default:            fmt.Printf(format, "???")
+		}
+	}
+	fmt.Println()
+}
+
+func (t Task) PrintTable() {
+	fmt.Println(t.String())
+}
 
 // -------------------------------------------------------------------
 // ---- Private functions --------------------------------------------
@@ -232,9 +281,37 @@ func getField(line string) (field, value string, found bool) {
 }
 
 func getNewID(s Settings, n int) string {
-    b := make([]byte, n)
-    for i := range b {
-        b[i] = s.IDCharacters[rand.Intn(len(s.IDCharacters))]
-    }
-    return "@" + string(b)
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = s.IDCharacters[rand.Intn(len(s.IDCharacters))]
+	}
+	return "@" + string(b)
+}
+
+func fieldFormat(field string) string {
+	switch field {
+	case "ID":           return "%-8v "
+	case "Prio":         return "%-5v "
+	case "Status":       return "%-10v "
+	case "Project":      return "%-10v "
+	case "Reporter":     return "%-10v "
+	case "Assignee":     return "%-10v "
+	case "Changelog":    return "%-10v "
+	case "Subject":      return "%v "
+	default:             return "%v "
+	}
+}
+
+func str2(s string) string {
+	switch s {
+	case "": return "-"
+	default: return s
+	}
+}
+
+func bool2(b bool) string {
+	switch b {
+	case true: return "yes"
+	default:   return "no"
+	}
 }

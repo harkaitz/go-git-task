@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"fmt"
-	"errors"
 	"strings"
 	"github.com/harkaitz/go-git-task"
 )
@@ -14,14 +13,15 @@ const help string =
 This program is a task manager for git. It uses a directory ".task" to
 store the tasks as ".task/@STATUS/@ID_SLUG.task":
 
-  show                Show configuration.
-  new                 Create new task.
-  edit [ID]           Edit task (the new one or the ongoing if none specified)
-  ls [--help]         List tasks.
-  @STATUS ID...       Move tasks between different status.
-  rename ID SLUG      Set slug for a task.
-  view [ID]           View task (by default ongoing).
-  changelog VER LINE  Print changelog section for version.
+  show                 Show configuration.
+  new                  Create new task.
+  edit [ID]            Edit task (the new one or the ongoing if none specified)
+  ls [--help]          List tasks.
+  @STATUS ID...        Move tasks between different status.
+  rename ID SLUG       Set a slug to a task.
+  remove ID            Remove a task.
+  view [ID]            View task (by default ongoing).
+  changelog CHANGELOG  Print changelog section.
 
 Statuses: @new,@todo,@done,@closed,@invalid,@ongoing,@back
 Fields: ID,Prio,Status,Project,Reporter,Assignee,SubjectSlug
@@ -35,7 +35,7 @@ List tasks.
 
   f=FIELDS,...  Fields to show.     r=REPORTER   Reporter to show.
   s=STATUS,...  Status to show.     a=ASSIGNEE   Assignee to show.
-  p=PROJECT     Project to show.
+  p=PROJECT     Project to show.    c=CHANGELOG  Repo name for changelog.
 
 Statuses: %v
 Fields: %v
@@ -74,8 +74,10 @@ func main() {
 	case cmd == "new":   err = New()
 	case cmd == "edit":  err = Edit(args)
 	case cmd == "ls":    err = Ls(args)
+	case cmd == "lst":   err = Ls(append([]string {"s=@todo"}, args...))
 	case len(cmd) > 1 && cmd[0] == '@': err = Status(cmd, args)
 	case cmd == "rename":    err = Rename(args)
+	case cmd == "remove":    err = Remove(args)
 	case cmd == "view":      err = View(args)
 	case cmd == "changelog": err = Changelog(args)
 	default:                 err = fmt.Errorf("Unknown command: %s", cmd)
@@ -104,17 +106,23 @@ func New() (err error) {
 func Edit(args []string) (err error) {
 	var tasks         gtask.Tasks
 	var task         *gtask.Task
+	var found         bool
 
 	tasks, err = S.ListTasks()
 	if err != nil { return }
 
 	switch len(args) {
-	case 0: task, _, err = tasks.FilterByStatus("@new").First("No new tasks found, create with 'new'")
-	case 1: task, _, err = tasks.SearchByID(args[0])
-	default:         err = fmt.Errorf("Too many arguments")
+	case 0: task, found, err = tasks.FilterByStatus("@new").First("No new tasks found, create with 'new'")
+	case 1: task, found, err = tasks.SearchByID(args[0])
+	default: err = fmt.Errorf("Too many arguments")
 	}
 	if err != nil { return }
+	if !found {
+		err = fmt.Errorf("Task not found")
+		return
+	}
 
+	fmt.Print(task)
 	err = task.Edit(&S)
 	if err != nil { return }
 
@@ -125,6 +133,8 @@ func Ls(args []string) (err error) {
 	var tasks         gtask.Tasks
 	var arg           string
 	var parts       []string
+
+	S.LsProject = S.GetProject()
 
 	for _, arg = range args {
 		parts = strings.SplitN(arg, "=", 2)
@@ -138,6 +148,7 @@ func Ls(args []string) (err error) {
 		case "p": S.LsProject  = parts[1]
 		case "r": S.LsReporter = parts[1]
 		case "a": S.LsAssignee = parts[1]
+		case "c": S.LsChangelog = parts[1]
 		default: err = fmt.Errorf("Unknown option: %s", arg); return
 		}
 	}
@@ -193,6 +204,23 @@ func Rename(args []string) (err error) {
 	return
 }
 
+func Remove(args []string) (err error) {
+	var tasks         gtask.Tasks
+	var task         *gtask.Task
+	var arg           string
+
+	for _, arg = range args {
+		tasks, err = S.ListTasks()
+		if err != nil { return }
+		task, _, err = tasks.SearchByID(arg)
+		if err != nil { return }
+		err = task.Remove(&S)
+		if err != nil { return }
+	}
+
+	return
+}
+
 func View(args []string) (err error) {
 	var tasks         gtask.Tasks
 	var task         *gtask.Task
@@ -213,24 +241,23 @@ func View(args []string) (err error) {
 
 func Changelog(args []string) (err error) {
 	var tasks         gtask.Tasks
-	var version       string
-	var line          string
-	var errl        []error
+	var task          gtask.Task
 
-	switch len(args) {
-	case 0:  err = fmt.Errorf("Not enough arguments")
-	case 1:  version = args[0]
-	default: version = args[0]; line = strings.Join(args[1:], " ")
+	if len(args) < 1 {
+		err = fmt.Errorf("Not enough arguments")
+		return
 	}
-	if err != nil { return }
+
+	S.LsProject = S.GetProject()
+	S.LsChangelog = args[0]
+	S.LsStates = "@done"
 
 	tasks, err = S.ListTasks()
 	if err != nil { return }
 
-	tasks = tasks.FilterByVersionPublic(version)
-
-	errl = tasks.PrintChangelog(version, line)
-	if errl != nil { err = errors.Join(errl...); return }
+	for _, task = range tasks.FilterBySettings(&S).Tasks {
+		fmt.Printf("- (%v) %v\n", task.ID, task.Subject)
+	}
 
 	return
 }
