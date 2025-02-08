@@ -17,6 +17,8 @@ store the tasks as ".task/@STATUS/@ID_SLUG.task":
   new                  Create new task.
   edit [ID]            Edit task (the new one or the ongoing if none specified)
   ls [--help]          List tasks.
+  lst                  List @todo,@ongoing and @done.
+  lsn                  List @new tasks.
   @STATUS ID...        Move tasks between different status.
   rename ID SLUG       Set a slug to a task.
   remove ID            Remove a task.
@@ -74,7 +76,8 @@ func main() {
 	case cmd == "new":   err = New()
 	case cmd == "edit":  err = Edit(args)
 	case cmd == "ls":    err = Ls(args)
-	case cmd == "lst":   err = Ls(append([]string {"s=@todo"}, args...))
+	case cmd == "lst":   err = Ls(append([]string {"s=@todo,@ongoing,@done"}, args...))
+	case cmd == "lsn":   err = Ls(append([]string {"s=@new"}, args...))
 	case len(cmd) > 1 && cmd[0] == '@': err = Status(cmd, args)
 	case cmd == "rename":    err = Rename(args)
 	case cmd == "remove":    err = Remove(args)

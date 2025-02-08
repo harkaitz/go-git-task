@@ -71,16 +71,16 @@ func (i Tasks) FilterBySettings(s *Settings) (o Tasks) {
 
 	for _, status = range strings.Split(s.GetLsStates(), ",") {
 		for _, task = range i.Tasks {
-			if s.LsProject != "" && task.Project != s.LsProject {
+			if s.LsProject != "" && !strings.EqualFold(task.Project, s.LsProject) {
 				continue
 			}
-			if s.LsReporter != "" && task.Reporter != s.LsReporter {
+			if s.LsReporter != "" && !strings.EqualFold(task.Reporter, s.LsReporter) {
 				continue
 			}
-			if s.LsAssignee != "" && task.Assignee != s.LsAssignee {
+			if s.LsAssignee != "" && !strings.EqualFold(task.Assignee, s.LsAssignee) {
 				continue
 			}
-			if s.LsChangelog != "" && task.Changelog != s.LsChangelog {
+			if s.LsChangelog != "" && !strings.EqualFold(task.Changelog, s.LsChangelog) {
 				continue
 			}
 			if task.Status == status {
