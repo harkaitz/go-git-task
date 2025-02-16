@@ -73,11 +73,11 @@ func (s *Settings) GetReporter() string {
 }
 
 func (s *Settings) GetLsFields() string {
-	return getSetting(&s.LsFields, "task.ls.fields",   "", "ID,Prio,Status,Project,Changelog,Assignee,SubjectSlug")
+	return getSetting(&s.LsFields, "task.ls.fields",   "", "ID,Public,Status,Project,Changelog,Assignee,SubjectSlug")
 }
 
 func (s *Settings) GetLsStates() string {
-	return getSetting(&s.LsStates, "task.ls.states", "", "@back,@done,@todo,@ongoing")
+	return getSetting(&s.LsStates, "task.ls.states", "", "@new,@back,@done,@todo,@ongoing")
 }
 
 func (s *Settings) GetLsProject() string {

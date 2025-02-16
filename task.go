@@ -68,7 +68,7 @@ func (t *Task) ParseString(data string) (err error) {
 		case "Project":   t.Project = value
 		case "Type":      t.Type = value
 		case "Subject":   t.Subject = value
-		case "Public":    t.Public = (value == "yes")
+		case "Public":    t.Public = (value == "yes" || value == "true")
 		case "Priority":  t.Priority, _ = strconv.Atoi(value)
 		case "Assignee":  t.Assignee = value
 		case "Reporter":  t.Reporter = value
@@ -298,6 +298,7 @@ func fieldFormat(field string) string {
 	case "Assignee":     return "%-10v "
 	case "Changelog":    return "%-10v "
 	case "Subject":      return "%v "
+	case "Public":       return "%-10v "
 	default:             return "%v "
 	}
 }

@@ -110,24 +110,35 @@ func Edit(args []string) (err error) {
 	var tasks         gtask.Tasks
 	var task         *gtask.Task
 	var found         bool
+	var arg           string
 
 	tasks, err = S.ListTasks()
 	if err != nil { return }
 
-	switch len(args) {
-	case 0: task, found, err = tasks.FilterByStatus("@new").First("No new tasks found, create with 'new'")
-	case 1: task, found, err = tasks.SearchByID(args[0])
-	default: err = fmt.Errorf("Too many arguments")
-	}
-	if err != nil { return }
-	if !found {
-		err = fmt.Errorf("Task not found")
+	if len(args) == 0 {
+		task, found, err = tasks.FilterByStatus("@new").First("No new tasks found, create with 'new'")
+		if err != nil { return }
+		if !found {
+			err = fmt.Errorf("Task not found")
+			return
+		}
+		fmt.Print(task)
+		err = task.Edit(&S)
+		if err != nil { return }
 		return
 	}
 
-	fmt.Print(task)
-	err = task.Edit(&S)
-	if err != nil { return }
+	for _, arg = range args {
+		task, found, err = tasks.SearchByID(arg)
+		if err != nil { return }
+		if !found {
+			err = fmt.Errorf("Task not found")
+			return
+		}
+		fmt.Print(task)
+		err = task.Edit(&S)
+		if err != nil { return }
+	}
 
 	return
 }
@@ -259,7 +270,11 @@ func Changelog(args []string) (err error) {
 	if err != nil { return }
 
 	for _, task = range tasks.FilterBySettings(&S).Tasks {
-		fmt.Printf("- (%v) %v\n", task.ID, task.Subject)
+		if task.Public {
+			fmt.Printf("- (%v) %v (public)\n", task.ID, task.Subject)
+		} else {
+			fmt.Printf("- (%v) %v\n", task.ID, task.Subject)
+		}
 	}
 
 	return
